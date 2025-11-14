@@ -13,4 +13,4 @@ Thumbs.db
 *.log
 
 # Environment files
-!application.properties
+!src/main/resources/application.properties   # Make sure to track application.properties in resources
