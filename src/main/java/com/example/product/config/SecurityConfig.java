@@ -36,7 +36,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setContentType("application/json");
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.getOutputStream().println("{\"success\":false,\"message\":\"Unauthorized\"}");
+                            response.getOutputStream()
+                                    .println("{\"success\":false,\"message\":\"Unauthorized\"}");
                         })
                 );
 
@@ -45,20 +46,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+
+        // Use AuthenticationManagerBuilder to configure DaoAuthenticationProvider
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+
+        authenticationManagerBuilder
+                .userDetailsService(userDetailsService) // Use custom UserDetailsService
+                .passwordEncoder(passwordEncoder());  // Use the password encoder
+
+        return authenticationManagerBuilder.build();
     }
 
-    @Bean
-    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .authenticationProvider(authenticationProvider())
-                .build();
-    }
-
+    // No need to define DaoAuthenticationProvider manually
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

@@ -5,6 +5,8 @@ import com.example.product.model.Product;
 import com.example.product.response.ApiResponse;
 import com.example.product.service.ProductService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,11 +18,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
+@Tag(name = "Products", description = "Product CRUD API")
 public class ProductController {
 
     private final ProductService productService;
 
     @GetMapping
+    @Operation(
+            summary = "Get all products",
+            description = "Retrieve the list of all products. Returns 204 if no products are found."
+    )
     public ResponseEntity<ApiResponse<List<Product>>> getProductList() {
         List<Product> products = productService.getProductList();
 
@@ -40,6 +47,10 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
+    @Operation(
+            summary = "Get product by ID",
+            description = "Retrieve a product by its ID. Returns 404 if the product does not exist."
+    )
     public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Long id) {
         Product product = productService.getProductById(id);
 
@@ -59,6 +70,10 @@ public class ProductController {
     }
 
     @PostMapping
+    @Operation(
+            summary = "Create a product",
+            description = "Create a new product with the provided details."
+    )
     public ResponseEntity<ApiResponse<Product>> createProduct(@Valid @RequestBody ProductRequestDTO dto) {
         try {
             Product savedProduct = productService.createProduct(dto);
@@ -81,6 +96,10 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @Operation(
+            summary = "Update product",
+            description = "Update an existing product by its ID. Returns 404 if the product does not exist."
+    )
     public ResponseEntity<ApiResponse<Product>> updateProduct(@PathVariable Long id,
                                                               @Valid @RequestBody ProductRequestDTO dto) {
         Product updatedProduct = productService.updateProduct(id, dto);
@@ -102,6 +121,10 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Delete product",
+            description = "Delete a product by its ID. Returns 404 if the product does not exist."
+    )
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
         boolean deleted = productService.deleteProduct(id);
 

@@ -6,12 +6,13 @@ import com.example.product.dto.AuthResponseDTO;
 import com.example.product.model.User;
 import com.example.product.repository.UserRepository;
 import com.example.product.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +25,7 @@ import java.util.Date;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "Authentication API")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -32,6 +34,10 @@ public class AuthController {
     private final JwtUtils jwtUtils;
 
     @PostMapping("/register")
+    @Operation(
+            summary = "Register new user",
+            description = "This endpoint allows users to register a new account with a username and password."
+    )
     public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody AuthRequestDTO dto) {
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
             ApiResponse<Void> response = new ApiResponse<>(false,
@@ -58,45 +64,31 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<?>> login(@Valid @RequestBody AuthRequestDTO dto) {
-        try {
-            // Attempt authentication
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
-            );
+    @Operation(
+            summary = "User login",
+            description = "This endpoint allows users to log in using their username and password. On successful authentication, a JWT token is generated."
+    )
+    public ResponseEntity<ApiResponse<AuthResponseDTO>> login(@Valid @RequestBody AuthRequestDTO dto) {
 
-            // If authentication is successful, generate JWT token
-            String token = jwtUtils.generateToken(dto.getUsername());
+        // Attempt authentication
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
+        );
 
-            // Calculate token expiration time (30 minutes)
-            Date expirationTime = new Date(System.currentTimeMillis() + 30 * 60 * 1000);
+        // If authentication is successful, generate JWT token
+        String token = jwtUtils.generateToken(dto.getUsername());
 
-            AuthResponseDTO authResponse = new AuthResponseDTO(token, expirationTime);
+        // Calculate token expiration time (30 minutes)
+        Date expirationTime = new Date(System.currentTimeMillis() + 30 * 60 * 1000);
 
-            ApiResponse<AuthResponseDTO> response = new ApiResponse<>(true,
-                    HttpStatus.OK.value(),
-                    "Login successful",
-                    authResponse);
+        AuthResponseDTO authResponse = new AuthResponseDTO(token, expirationTime);
 
-            return ResponseEntity.ok(response);
+        ApiResponse<AuthResponseDTO> response = new ApiResponse<>(true,
+                HttpStatus.OK.value(),
+                "Login successful",
+                authResponse);
 
-        } catch (BadCredentialsException e) {
-            // Handle bad credentials
-            ApiResponse<String> errorResponse = new ApiResponse<>(false,
-                    HttpStatus.UNAUTHORIZED.value(),
-                    "Invalid username or password",
-                    null);
-
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-        } catch (Exception e) {
-            // Handle general exceptions (e.g., unexpected errors)
-            ApiResponse<String> errorResponse = new ApiResponse<>(false,
-                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                    "An error occurred while processing your request",
-                    null);
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
+        return ResponseEntity.ok(response);
     }
 
 }
