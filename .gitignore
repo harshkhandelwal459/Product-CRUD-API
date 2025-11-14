@@ -1,5 +1,5 @@
 # Maven target directory
-#/target/
+target/
 
 # IntelliJ IDEA files
 /.idea/
@@ -13,5 +13,4 @@ Thumbs.db
 *.log
 
 # Environment files
-application.properties
-
+!application.properties
