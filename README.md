@@ -84,6 +84,15 @@ This project does **not use Docker**. It assumes that you have MySQL installed a
 
 ---
 
+## Swagger UI 📄
+
+1. Once the application is running, you can view the API documentation and try out the endpoints directly from Swagger UI at:
+
+    ```bash
+    http://localhost:8080/swagger-ui/index.html
+    ```
+---
+
 ### Additional Information 📚
 
 - **JWT Authentication**: This project uses JWT to authenticate users. You will need to send a valid token in the `Authorization` header of each API request to access protected endpoints.
