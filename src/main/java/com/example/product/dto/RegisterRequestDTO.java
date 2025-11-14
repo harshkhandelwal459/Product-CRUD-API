@@ -1,0 +1,15 @@
+package com.example.product.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+
+@Data
+public class RegisterRequestDTO {
+
+    @NotBlank
+    private String username;
+
+    @NotBlank
+    private String password;
+
+}
